@@ -20,17 +20,17 @@ public class Main {
                 int choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
-                        System.out.print("Enter amount of coins: ");
-                        int coins = scanner.nextInt();
-                        machine.addCoins(coins);
+                        System.out.print("Enter coin type (5, 10, 20, 50, 100, 200): ");
+                        int coinType = scanner.nextInt();
+                        System.out.print("Enter quantity of coins: ");
+                        int quantity = scanner.nextInt();
+                        machine.addCoins(coinType, quantity);
                         break;
                     case 2:
                         System.out.print("Enter type of coffee (espresso, latte, mocha):");
                         String type = scanner.next();
                         if (machine.makeCoffee(type)) {
-                            System.out.println("Enjoy your " + type + "!");
-                        } else {
-                            System.out.println("Not enough ingredients.");
+                            System.out.println("\n\nEnjoy your " + type + "!");
                         }
                         break;
                     case 3:
