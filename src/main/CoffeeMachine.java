@@ -4,6 +4,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -50,7 +53,12 @@ public class CoffeeMachine {
         JSONParser parser = new JSONParser();
         try (FileReader reader = new FileReader("src/resources/prices.json")) {
             JSONObject jsonObject = (JSONObject) parser.parse(reader);
-            this.prices = (Map<String, Integer>) jsonObject;
+            this.prices = new HashMap<>();
+            for (Object key : jsonObject.keySet()) {
+                String drink = (String) key;
+                Long priceLong = (Long) jsonObject.get(drink);
+                this.prices.put(drink, priceLong.intValue());
+            }
         } catch (IOException | ParseException e) {
             System.out.println("Error loading prices: " + e.getMessage());
         }
@@ -71,12 +79,32 @@ public class CoffeeMachine {
         }
     }
 
-    public void addCoins(int coinType, int quantity) {
-        if (coinType == 5 || coinType == 10 || coinType == 20 || coinType == 50 || coinType == 100 || coinType == 200) {
-            this.coins += coinType * quantity;
-        } else {
-            System.out.println("Invalid coin type. Please insert 5, 10, 20, 50, 100, or 200 coins.");
+    public void addCoins(String coinType, int quantity) {
+        int coinValue = 0;
+        switch (coinType) {
+            case "5":
+                coinValue = 5;
+                break;
+            case "10":
+                coinValue = 10;
+                break;
+            case "20":
+                coinValue = 20;
+                break;
+            case "50":
+                coinValue = 50;
+                break;
+            case "1lv":
+                coinValue = 100;
+                break;
+            case "2lv":
+                coinValue = 200;
+                break;
+            default:
+                System.out.println("Invalid coin type. Please insert 5, 10, 20, 50, 1lv, or 2lv coins.");
+                return;
         }
+        this.coins += coinValue * quantity;
     }
 
     public boolean makeCoffee(String type) {
@@ -145,5 +173,23 @@ public class CoffeeMachine {
         this.milk += milk;
         this.chocolate += chocolate;
         saveIngredients();
+    }
+
+    public Map<String, Integer> getChange(int amount) {
+        int[] coinTypes = {200, 100, 50, 20, 10, 5};
+        Map<String, Integer> change = new HashMap<>();
+        for (int coin : coinTypes) {
+            int count = 0;
+            while (amount >= coin) {
+                amount -= coin;
+                count++;
+            }
+            if (count > 0) {
+                String coinType = coin == 200 ? "2lv" : coin == 100 ? "1lv" : String.valueOf(coin);
+                change.put(coinType, count);
+            }
+        }
+        this.coins = 0; // Reset coins after giving change
+        return change;
     }
 }
