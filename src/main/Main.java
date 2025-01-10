@@ -55,11 +55,11 @@ public class Main {
                         System.exit(0);
                         break;
                     default:
-                        System.out.println("Invalid choice.");
+                        System.out.println("\nChoice out of range.");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("\nInvalid input. Please enter a number [1-4].");
-                scanner.next(); // Clear the invalid input
+                System.out.println("\nInvalid input.");
+                scanner.next();
             }
         }
     }

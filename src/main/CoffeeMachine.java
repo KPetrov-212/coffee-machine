@@ -5,8 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -48,7 +46,6 @@ public class CoffeeMachine {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadPrices() {
         JSONParser parser = new JSONParser();
         try (FileReader reader = new FileReader("src/resources/prices.json")) {
