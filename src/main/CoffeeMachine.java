@@ -186,7 +186,7 @@ public class CoffeeMachine {
                 change.put(coinType, count);
             }
         }
-        this.coins = 0; // Reset coins after giving change
+        this.coins = 0;
         return change;
     }
 }
