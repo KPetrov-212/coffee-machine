@@ -1,7 +1,7 @@
 package main;
 
 import java.util.InputMismatchException;
-import java.util.Map;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -35,9 +35,9 @@ public class Main {
                             System.out.println("\nEnjoy your " + type + "!");
                             int remainingCoins = machine.getCoins();
                             if (remainingCoins > 0) {
-                                Map<String, Integer> change = machine.getChange(remainingCoins);
+                                List<String> change = machine.getChange(remainingCoins);
                                 System.out.println("Returning change: ");
-                                change.forEach((coin, count) -> System.out.println(count + " x " + coin));
+                                change.forEach(System.out::println);
                             }
                         }
                         break;
@@ -51,14 +51,20 @@ public class Main {
                         machine.refillIngredients(coffee, milk, chocolate);
                         break;
                     case 4:
+                        int remainingCoins = machine.getCoins();
+                        if (remainingCoins > 0) {
+                            List<String> change = machine.getChange(remainingCoins);
+                            System.out.println("Returning change: ");
+                            change.forEach(System.out::println);
+                        }
                         scanner.close();
                         System.exit(0);
                         break;
                     default:
-                        System.out.println("\nChoice out of range.");
+                        System.out.println("Invalid choice.");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("\nInvalid input.");
+                System.out.println("Invalid input. Please enter a number [1-4].");
                 scanner.next();
             }
         }

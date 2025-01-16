@@ -3,18 +3,25 @@ package main;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class CoffeeMachine {
+    private static final String COFFEE_KEY = "coffee";
+    private static final String MILK_KEY = "milk";
+    private static final String CHOCOLATE_KEY = "chocolate";
+    private static final String ESPRESSO_KEY = "espresso";
+    private static final String LATTE_KEY = "latte";
+    private static final String MOCHA_KEY = "mocha";
+
     private int coffee;
     private int milk;
     private int chocolate;
     private int coins;
-    private Map<String, Integer> prices;
+    private int[] prices;
 
     public CoffeeMachine() {
         loadIngredients();
@@ -23,7 +30,7 @@ public class CoffeeMachine {
     }
 
     public String getDrinksPrices() {
-        return "Espresso: " + prices.get("espresso") + ", Latte: " + prices.get("latte") + ", Mocha: " + prices.get("mocha");
+        return "Espresso: " + prices[0] + ", Latte: " + prices[1] + ", Mocha: " + prices[2];
     }
 
     public int getCoins() {
@@ -35,38 +42,44 @@ public class CoffeeMachine {
     }
 
     private void loadIngredients() {
-        JSONParser parser = new JSONParser();
-        try (FileReader reader = new FileReader("src/resources/ingredients.json")) {
-            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-            this.coffee = ((Long) jsonObject.get("coffee")).intValue();
-            this.milk = ((Long) jsonObject.get("milk")).intValue();
-            this.chocolate = ((Long) jsonObject.get("chocolate")).intValue();
-        } catch (IOException | ParseException e) {
-            System.out.println("Error loading ingredients: " + e.getMessage());
+        JSONObject jsonObject = parseJsonFile("src/resources/ingredients.json");
+        if (jsonObject != null) {
+            this.coffee = getIntValue(jsonObject, COFFEE_KEY);
+            this.milk = getIntValue(jsonObject, MILK_KEY);
+            this.chocolate = getIntValue(jsonObject, CHOCOLATE_KEY);
         }
     }
 
     private void loadPrices() {
-        JSONParser parser = new JSONParser();
-        try (FileReader reader = new FileReader("src/resources/prices.json")) {
-            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-            this.prices = new HashMap<>();
-            for (Object key : jsonObject.keySet()) {
-                String drink = (String) key;
-                Long priceLong = (Long) jsonObject.get(drink);
-                this.prices.put(drink, priceLong.intValue());
-            }
-        } catch (IOException | ParseException e) {
-            System.out.println("Error loading prices: " + e.getMessage());
+        JSONObject jsonObject = parseJsonFile("src/resources/prices.json");
+        if (jsonObject != null) {
+            this.prices = new int[3];
+            this.prices[0] = getIntValue(jsonObject, ESPRESSO_KEY);
+            this.prices[1] = getIntValue(jsonObject, LATTE_KEY);
+            this.prices[2] = getIntValue(jsonObject, MOCHA_KEY);
         }
     }
 
-    @SuppressWarnings("unchecked")
+    private JSONObject parseJsonFile(String filePath) {
+        JSONParser parser = new JSONParser();
+        try (FileReader reader = new FileReader(filePath)) {
+            return (JSONObject) parser.parse(reader);
+        } catch (IOException | ParseException e) {
+            System.out.println("Error loading JSON file: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private int getIntValue(JSONObject jsonObject, String key) {
+        Long value = (Long) jsonObject.get(key);
+        return value != null ? value.intValue() : 0;
+    }
+
     private void saveIngredients() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("coffee", this.coffee);
-        jsonObject.put("milk", this.milk);
-        jsonObject.put("chocolate", this.chocolate);
+        jsonObject.put(COFFEE_KEY, this.coffee);
+        jsonObject.put(MILK_KEY, this.milk);
+        jsonObject.put(CHOCOLATE_KEY, this.chocolate);
 
         try (FileWriter file = new FileWriter("src/resources/ingredients.json")) {
             file.write(jsonObject.toJSONString());
@@ -108,7 +121,7 @@ public class CoffeeMachine {
         int cost = 0;
         switch (type.toLowerCase()) {
             case "espresso":
-                cost = prices.get("espresso");
+                cost = prices[0];
                 if (coffee >= 50 && coins >= cost) {
                     coffee -= 50;
                     coins -= cost;
@@ -119,7 +132,7 @@ public class CoffeeMachine {
                 }
                 break;
             case "latte":
-                cost = prices.get("latte");
+                cost = prices[1];
                 if (coffee >= 30 && milk >= 20 && coins >= cost) {
                     coffee -= 30;
                     milk -= 20;
@@ -131,7 +144,7 @@ public class CoffeeMachine {
                 }
                 break;
             case "mocha":
-                cost = prices.get("mocha");
+                cost = prices[2];
                 if (coffee >= 30 && milk >= 20 && chocolate >= 10 && coins >= cost) {
                     coffee -= 30;
                     milk -= 20;
@@ -172,9 +185,9 @@ public class CoffeeMachine {
         saveIngredients();
     }
 
-    public Map<String, Integer> getChange(int amount) {
+    public List<String> getChange(int amount) {
         int[] coinTypes = {200, 100, 50, 20, 10, 5};
-        Map<String, Integer> change = new HashMap<>();
+        List<String> change = new ArrayList<>();
         for (int coin : coinTypes) {
             int count = 0;
             while (amount >= coin) {
@@ -182,11 +195,22 @@ public class CoffeeMachine {
                 count++;
             }
             if (count > 0) {
-                String coinType = coin == 200 ? "2lv" : coin == 100 ? "1lv" : String.valueOf(coin);
-                change.put(coinType, count);
+                String coinType;
+                switch (coin) {
+                    case 200:
+                        coinType = "2lv";
+                        break;
+                    case 100:
+                        coinType = "1lv";
+                        break;
+                    default:
+                        coinType = String.valueOf(coin);
+                        break;
+                }
+                change.add(count + " x " + coinType);
             }
         }
-        this.coins = 0;
+        this.coins = 0; // Reset coins after giving change
         return change;
     }
 }
