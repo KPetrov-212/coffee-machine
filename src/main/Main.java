@@ -29,15 +29,13 @@ public class Main {
                         machine.addCoins(coinType, quantity);
                         break;
                     case 2:
-                        System.out.print("Enter type of coffee (espresso, latte, mocha): ");
+                        System.out.print("Choose coffee (espresso, latte, mocha): ");
                         String type = scanner.next();
                         if (machine.makeCoffee(type)) {
                             System.out.println("\nEnjoy your " + type + "!");
                             int remainingCoins = machine.getCoins();
                             if (remainingCoins > 0) {
-                                List<String> change = machine.getChange(remainingCoins);
-                                System.out.println("Returning change: ");
-                                change.forEach(System.out::println);
+                                printChange(machine.getChange(remainingCoins));
                             }
                         }
                         break;
@@ -53,9 +51,7 @@ public class Main {
                     case 4:
                         int remainingCoins = machine.getCoins();
                         if (remainingCoins > 0) {
-                            List<String> change = machine.getChange(remainingCoins);
-                            System.out.println("Returning change: ");
-                            change.forEach(System.out::println);
+                            printChange(machine.getChange(remainingCoins));
                         }
                         scanner.close();
                         System.exit(0);
@@ -67,6 +63,13 @@ public class Main {
                 System.out.println("Invalid input. Please enter a number [1-4].");
                 scanner.next();
             }
+        }
+    }
+
+    private static void printChange(List<String> change) {
+        System.out.println("Returning change: ");
+        for (String coin : change) {
+            System.out.println(coin);
         }
     }
 }
